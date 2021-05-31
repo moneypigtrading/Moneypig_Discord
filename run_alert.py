@@ -2,6 +2,8 @@ import sys
 
 import json
 
+# this script take command lines and import all the required classes to trigger Discord alerts
+
 alert_name = sys.argv[1]
 
 print(alert_name)
