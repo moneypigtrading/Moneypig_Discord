@@ -1,5 +1,4 @@
 iexfinance==0.5.0
 matplotlib==3.3.4
-numpy==1.9
 pandas==1.1.5
 
