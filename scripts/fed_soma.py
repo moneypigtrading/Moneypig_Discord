@@ -29,7 +29,6 @@ import requests
 
 from discord_utility.discord_utility import discord_utility
 
-import os
 import shutil
 
 import os
@@ -178,16 +177,21 @@ class fed_soma():
             plt.title(header, fontsize=26)
 
             # save the plot as a file
-            fig.savefig(file_prefix + '_' + start_date + '_' + end_date + '.png',
+
+            # instagram can only post in .jpg
+
+            fig.savefig(file_prefix + '_' + start_date + '_' + end_date + '.jpg',
                         format='jpeg',
                         dpi=300,
                         bbox_inches='tight')
 
-            file_name = str(file_prefix + '_' + start_date + '_' + end_date + '.png')
+            file_name = str(file_prefix + '_' + start_date + '_' + end_date + '.jpg')
 
             return file_name
 
-        image_file=plot_double_axis_water_mark_scatter_plot('2020_looka_purchased_logo.png', "Date", "Fed SOMA ($10bn)", "$SPY Price",
+        logo_file = os.path.join(dirname, '../2020_looka_purchased_logo.png')
+
+        image_file=plot_double_axis_water_mark_scatter_plot(logo_file, "Date", "Fed SOMA ($10bn)", "$SPY Price",
                                                  'Federal Reserves SOMA Total vs $SPY','soma_spy', self.start_date_fed_soma, end_date_soma)
 
         latest_soma=df_soma['Total_10bn'].iloc[[-1]].to_string(index=False).lstrip()
