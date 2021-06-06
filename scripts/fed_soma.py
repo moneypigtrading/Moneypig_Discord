@@ -249,9 +249,11 @@ class fed_soma():
 
         d=discord_utility() #initiate the discord class
 
+        # send the alert to discord #market-flows channel
+
         d.send_file_to_discord(message, image_file, self.webhook_id, self.webhook_token)
 
-        print(message_zh)
+        # send the alert to discord #market-flows-zh channel
 
         d.send_file_to_discord(message_zh, image_file, self.webhook_id_zh, self.webhook_token_zh)
 
@@ -263,7 +265,9 @@ class fed_soma():
         #
         # d.post_to_facebook_group('432278254663723', message, "")
 
-        #d.post_to_instagram(image_file, IG_caption_message)
+        # Post to Moneypig IG English
+
+        d.post_to_instagram(image_file, IG_caption_message)
 
         # clean up the file by moving the image into the image folder
 
