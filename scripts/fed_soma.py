@@ -32,9 +32,15 @@ from discord_utility.discord_utility import discord_utility
 import os
 import shutil
 
+import os
+
+dirname = os.path.dirname(__file__)
+
+filename = os.path.join(dirname, '../config.ini')
+
 # get the iex private key so that we can get historical data
 
-df = pd.read_csv('config.ini', skipinitialspace=True)
+df = pd.read_csv(filename, skipinitialspace=True)
 
 secret=df['secret'].loc[df['name'] == 'iex']
 
@@ -224,6 +230,5 @@ class fed_soma():
         # clean up the file by moving the image into the image folder
 
         shutil.move(image_file, "image/")
-
 
 
