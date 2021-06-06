@@ -1,5 +1,18 @@
 import discord
 
+import pandas as pd
+
+from instabot import Bot
+
+bot = Bot() #initiate the instabot class
+
+import os
+
+dirname = os.path.dirname(__file__)
+
+filename = os.path.join(dirname, '../config.ini')
+
+
 class discord_utility():
 
     def send_file_to_discord(self, message, file_path, webhook_id, webhook_token):
@@ -13,3 +26,43 @@ class discord_utility():
             my_file = discord.File(f)
 
         webhook.send(message, username='webhook', file=my_file)
+
+    def post_to_instagram(self, file_name, IG_caption_message):
+
+        # https://www.geeksforgeeks.org/post-a-picture-automatically-on-instagram-using-python/
+
+        # how to publish with instagram locations
+
+        #https://developers.facebook.com/docs/instagram-api/guides/content-publishing/#publish-with-locations
+
+        # get the IG private key so that we can get historical data
+
+        df = pd.read_csv(filename, skipinitialspace=True)
+
+        secret = df['secret'].loc[df['name'] == 'instagram']
+
+        secret = secret.to_string(index=False)
+
+        secret = secret.lstrip()  # there is a leading space in the private key so need to remove it
+
+        username = df['user_name'].loc[df['name'] == 'instagram']
+
+        username = username.to_string(index=False).lstrip()
+
+        bot.login(username=username,
+                  password=secret)
+
+        bot.upload_photo(file_name, IG_caption_message)
+
+    def post_to_facebook_group(self, facebook_group_id, message, access_token):
+
+        import facebook
+        import time
+
+        groups = [facebook_group_id]
+
+        time.sleep(5)
+        graph = facebook.GraphAPI(access_token)
+        groups = graph.get_object("me/groups")
+        group_id = facebook_group_id #groups['data'][0]['id']  # we take the ID of the first group
+        graph.put_object(group_id, "feed", message=message)

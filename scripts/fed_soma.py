@@ -29,6 +29,10 @@ import requests
 
 from discord_utility.discord_utility import discord_utility
 
+from social_media_contents.social_media_contents import social_media_contents
+
+s=social_media_contents() #initate the class
+
 import shutil
 
 import os
@@ -53,8 +57,10 @@ class fed_soma():
 
         self.start_date_fed_soma = params.get('start_date', '')  #'2020-08-05'
         self.end_date_fed_soma = params.get('end_date', '')  #'2020-08-05'
-        self.webhook_id = params.get('webhook_id','')
-        self.webhook_token = params.get('webhook_token','')
+        self.webhook_id = params.get('webhook_id','')          #discord market-flows Channel
+        self.webhook_token = params.get('webhook_token','')    #discord market-flows Channel
+        self.webhook_id_zh = params.get('webhook_id_zh','')       #discord market-flows-zh Channels
+        self.webhook_token_zh = params.get('webhook_token_zh','') #discord market-flows-zh Channels
 
     # some cheat sheet
     # http://www.compciv.org/guides/python/how-tos/downloading-files-with-requests/
@@ -204,32 +210,58 @@ class fed_soma():
 
         if second_latest_soma_float > latest_soma_float:
 
-            message = 'Fed decreased its SOMA balance from ${second_latest_soma} tn' \
-                      ' to ${latest_soma} tn in the past 7 days. The decrease could elevate $TNX & ' \
-                      'lower the tech & growth stocks'.format(second_latest_soma=str(second_latest_soma_float),
+            message = 'Fed decreased its SOMA balance from ${second_latest_soma} tn ' \
+                      'to ${latest_soma} tn in the past 7 days. The decrease could elevate $TNX, financial, industrials stocks' \
+                      '& lower the tech & growth stocks, \n'.format(second_latest_soma=str(second_latest_soma_float),
+                                                               latest_soma=str(latest_soma_float))
+
+            message_zh = '聯準會過去七天把公開市場準備金從${second_latest_soma}兆降低至${latest_soma}兆。降低的過程' \
+                         '可能會導致十年國債殖利率($TNX)，金融跟工業類股升高，給科技股跟成長股帶來賣壓。\n'\
+                                            .format(second_latest_soma=str(second_latest_soma_float),
                                                                latest_soma=str(latest_soma_float))
 
         elif second_latest_soma_float < latest_soma_float:
 
             message = 'Fed increased its SOMA balance from ${second_latest_soma} tn ' \
-                      ' to ${latest_soma} tn  in the past 7 days. The increase could lower $TNX & ' \
-                      'push the tech & growth stocks higher '.format(second_latest_soma=str(second_latest_soma_float),
+                      'to ${latest_soma} tn in the past 7 days. The increase could lower $TNX financial, industrials stocks & ' \
+                      'push the tech & growth stocks higher \n'.format(second_latest_soma=str(second_latest_soma_float),
                                                                      latest_soma=str(latest_soma_float))
+
+            message_zh = '聯準會過去七天把公開市場準備金從${second_latest_soma}兆升高至${latest_soma}兆。升高的過程' \
+                         '可能會導致十年國債殖利率($TNX)，金融跟工業類股降低，給科技股跟成長股帶來買氣。\n'\
+                                            .format(second_latest_soma=str(second_latest_soma_float),
+                                                               latest_soma=str(latest_soma_float))
 
         else:
 
             message = 'Fed did not change its SOMA balance ${second_latest_soma} tn ' \
-                      ' in the past 7 days. This could make $TNX & ' \
-                      'tech & growth stocks stay flat'.format(second_latest_soma=str(second_latest_soma_float),
+                      'in the past 7 days. This could make $TNX & $SPY & the whole stock market including' \
+                      'tech & growth stocks stay flat \n'.format(second_latest_soma=str(second_latest_soma_float),
+                                                               latest_soma=str(latest_soma_float))
+
+            message_zh = '聯準會過去七天將公開市場準備金維持在${second_latest_soma}兆。升高的過程' \
+                         '可能會導致十年國債殖利率($TNX)，整個美股，包括科技股跟成長股持平。\n'\
+                                            .format(second_latest_soma=str(second_latest_soma_float),
                                                                latest_soma=str(latest_soma_float))
 
 
-        twitter_hastag="#stockmarket #stocktrading #stocks #investment #stockmarketnews " \
-                       "#investing #bonds #trading #forex $SPY $SPX $QQQ $IWM $EF_S $GC $BTC"
+        IG_caption_message = message + "\n" + s.About_moneypig + "\n" + s.instagram_hashtag
 
-        d=discord_utility()
+        d=discord_utility() #initiate the discord class
 
         d.send_file_to_discord(message, image_file, self.webhook_id, self.webhook_token)
+
+        d.send_file_to_discord(message_zh, image_file, self.webhook_id_zh, self.webhook_token_zh)
+
+        # Post to Moneypig Facebook Group English. Waiting for Facebook App approval
+
+        # d.post_to_facebook_group('748790555806325', message, "")
+        #
+        # # Post to Moneypig Facebook Group Chinese. Waiting for Facebook App approval
+        #
+        # d.post_to_facebook_group('432278254663723', message, "")
+
+        d.post_to_instagram(image_file, IG_caption_message)
 
         # clean up the file by moving the image into the image folder
 
