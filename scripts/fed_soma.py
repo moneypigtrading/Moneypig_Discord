@@ -1,4 +1,19 @@
-import requests
+'''
+This script get the Fed SOMA data weekly and SPY weekly historical data
+
+And make a plot and send the image and message to Discord automatically
+
+Author: Professor
+
+Email: moneypig@moneypigtrading.com
+
+Command Line Usage:
+
+python3 run_alert.py fed_soma_2020_08_05_start fed_soma
+'{"start_date_fed_soma": "2020-08-20",
+"webhook_id":"1234567","webhook_token":"abcdefg"
+
+'''
 
 import matplotlib.pyplot as plt
 
@@ -9,6 +24,13 @@ from datetime import date
 import pandas as pd
 
 from iexfinance.stocks import get_historical_data
+
+import requests
+
+from discord_utility.discord_utility import discord_utility
+
+import os
+import shutil
 
 # get the iex private key so that we can get historical data
 
@@ -26,6 +48,8 @@ class fed_soma():
 
         self.start_date_fed_soma = params.get('start_date', '')  #'2020-08-05'
         self.end_date_fed_soma = params.get('end_date', '')  #'2020-08-05'
+        self.webhook_id = params.get('webhook_id','')
+        self.webhook_token = params.get('webhook_token','')
 
     # some cheat sheet
     # http://www.compciv.org/guides/python/how-tos/downloading-files-with-requests/
@@ -72,7 +96,8 @@ class fed_soma():
 
         return history
 
-    def run(self):
+
+    def run(self): # this function actually runs the Fed SOMA plot generation
 
         if self.start_date_fed_soma == '':
 
@@ -146,23 +171,59 @@ class fed_soma():
 
             plt.title(header, fontsize=26)
 
-            # ax3 = plt.axes([0.5,0.8, 0.1, 0.1], frameon=True)  # Change the numbers in this array to position your image [left, bottom, width, height])
-            #
-            # image=plt.imread('2020_looka_purchased_logo.png')
-            #
-            # ax.imshow(image)
-            #
-            # ax3.axis('off')  # get rid of the ticks and ticklabels
-
-            plt.show()
-
             # save the plot as a file
             fig.savefig(file_prefix + '_' + start_date + '_' + end_date + '.png',
                         format='jpeg',
                         dpi=300,
                         bbox_inches='tight')
 
-        plot_double_axis_water_mark_scatter_plot('2020_looka_purchased_logo.png', "Date", "Fed SOMA ($10bn)", "$SPY Price",
+            file_name = str(file_prefix + '_' + start_date + '_' + end_date + '.png')
+
+            return file_name
+
+        image_file=plot_double_axis_water_mark_scatter_plot('2020_looka_purchased_logo.png', "Date", "Fed SOMA ($10bn)", "$SPY Price",
                                                  'Federal Reserves SOMA Total vs $SPY','soma_spy', self.start_date_fed_soma, end_date_soma)
+
+        latest_soma=df_soma['Total_10bn'].iloc[[-1]].to_string(index=False).lstrip()
+
+        latest_soma_float=round(float(latest_soma)/100, 2)
+
+        second_latest_soma=df_soma['Total_10bn'].iloc[[-2]].to_string(index=False).lstrip()
+
+        second_latest_soma_float=round(float(second_latest_soma)/100, 2)
+
+        if second_latest_soma_float > latest_soma_float:
+
+            message = 'Fed decreased its SOMA balance from ${second_latest_soma} tn' \
+                      ' to ${latest_soma} tn in the past 7 days. The decrease could elevate $TNX & ' \
+                      'lower the tech & growth stocks'.format(second_latest_soma=str(second_latest_soma_float),
+                                                               latest_soma=str(latest_soma_float))
+
+        elif second_latest_soma_float < latest_soma_float:
+
+            message = 'Fed increased its SOMA balance from ${second_latest_soma} tn ' \
+                      ' to ${latest_soma} tn  in the past 7 days. The increase could lower $TNX & ' \
+                      'push the tech & growth stocks higher '.format(second_latest_soma=str(second_latest_soma_float),
+                                                                     latest_soma=str(latest_soma_float))
+
+        else:
+
+            message = 'Fed did not change its SOMA balance ${second_latest_soma} tn ' \
+                      ' in the past 7 days. This could make $TNX & ' \
+                      'tech & growth stocks stay flat'.format(second_latest_soma=str(second_latest_soma_float),
+                                                               latest_soma=str(latest_soma_float))
+
+
+        twitter_hastag="#stockmarket #stocktrading #stocks #investment #stockmarketnews " \
+                       "#investing #bonds #trading #forex $SPY $SPX $QQQ $IWM $EF_S $GC $BTC"
+
+        d=discord_utility()
+
+        d.send_file_to_discord(message, image_file, self.webhook_id, self.webhook_token)
+
+        # clean up the file by moving the image into the image folder
+
+        shutil.move(image_file, "image/")
+
 
 
