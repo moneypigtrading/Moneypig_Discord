@@ -251,11 +251,11 @@ class fed_soma():
 
         # send the alert to discord #market-flows channel
 
-        d.send_file_to_discord(message, image_file, self.webhook_id, self.webhook_token)
+        #d.send_file_to_discord(message, image_file, self.webhook_id, self.webhook_token)
 
         # send the alert to discord #market-flows-zh channel
 
-        d.send_file_to_discord(message_zh, image_file, self.webhook_id_zh, self.webhook_token_zh)
+        #d.send_file_to_discord(message_zh, image_file, self.webhook_id_zh, self.webhook_token_zh)
 
         # Post to Moneypig Facebook Group English. Waiting for Facebook App approval
 

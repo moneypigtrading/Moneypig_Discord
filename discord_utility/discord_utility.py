@@ -1,5 +1,9 @@
 import discord
 
+from discord.ext import commands
+
+import csv
+
 import pandas as pd
 
 from instabot import Bot
@@ -27,6 +31,66 @@ class discord_utility():
 
         webhook.send(message, username='webhook', file=my_file)
 
+    def send_format_csv_to_discord(self, message, file_path, out_file, webhook_id, webhook_token):
+
+        webhook = discord.Webhook.partial(webhook_id, webhook_token, adapter=discord.RequestsWebhookAdapter())  # Your webhook
+
+        f = open(file_path)
+        csv_f = csv.reader(f)
+
+        with open(out_file, 'w') as csvfile:
+
+            writer = csv.writer(csvfile)
+
+            for row in csv_f:
+                print('{:<15}  {:<15}  {:<20} {:<25} '.format(*row), file=open(out_file, "a"))
+
+        with open(file=out_file, mode='rb') as f:
+
+            my_file = discord.File(f)
+
+        webhook.send(message, username='webhook', file=my_file)
+
+
+    def discord_bot_return_format_csv(self, message, file_path, webhook_id, webhook_token):
+
+        #this is an interacitve Bot function
+
+        #https://stackoverflow.com/questions/64321503/im-trying-to-output-the-already-formatted-contents-of-a-csv-file-into-a-text-ch
+
+        # token here has to be a Discord developer token https://stackoverflow.com/questions/51602617/improper-token-passed
+
+        print(webhook_id)
+
+        print(webhook_token)
+
+        f = open(file_path)
+        csv_f = csv.reader(f)
+
+        token = webhook_token
+        client = discord.Client()
+
+        @client.event
+        async def on_ready():
+            print('Bot ready')
+
+        @client.event
+        async def on_message(message):
+            if message.author == client.user:  # preventing the bot from replying to itself
+                return
+
+            if message.channel.id == webhook_id:
+                if message.content.startswith('%MarketMovers'):
+                    channel = client.get_channel(webhook_id)
+                    msg = message
+                    await channel.send(msg)
+                    for row in csv_f:
+                        await channel.send(('`{:<40}  {:<10}  {:<10}`').format(*row).replace('Â', ''))
+                else:
+                    await message.delete()
+
+        client.run(webhook_token)
+
     def post_to_instagram(self, file_name, IG_caption_message):
 
         # https://www.geeksforgeeks.org/post-a-picture-automatically-on-instagram-using-python/
@@ -48,6 +112,9 @@ class discord_utility():
         username = df['user_name'].loc[df['name'] == 'instagram']
 
         username = username.to_string(index=False).lstrip()
+
+        print(username)
+        print(secret)
 
         bot.login(username=username,
                   password=secret)
