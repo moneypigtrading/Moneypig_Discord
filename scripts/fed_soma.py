@@ -267,7 +267,26 @@ class fed_soma():
 
         # Post to Moneypig IG English
 
+
+        # there is a bug in the instabot where the cookie will make an error
+
+        # cookie_username = self.cookie_dict["ds_user"]
+        # KeyError: 'ds_user'
+
+        # https://stackoverflow.com/questions/67358845/instabot-api-for-python-raises-error-after-running-code-for-the-2nd-time
+        # https://stackoverflow.com/questions/66794193/cant-login-with-instabot
+
+        import glob
+        cookie_del = glob.glob("config/*cookie.json")
+        os.remove(cookie_del[0])
+
         d.post_to_instagram(image_file, IG_caption_message)
+
+        # After successful upload, temporary photo will be renamed to {photo_name}.CONVERTED.jpg.REMOVE_ME in media folder
+
+        # https://stackoverflow.com/questions/64733089/when-i-run-my-python-script-the-jpg-file-used-in-it-becomes-jpg-remove-me-what
+
+        os.rename(image_file+str('.REMOVE_ME'), image_file)
 
         # clean up the file by moving the image into the image folder
 
