@@ -276,9 +276,10 @@ class fed_soma():
         # https://stackoverflow.com/questions/67358845/instabot-api-for-python-raises-error-after-running-code-for-the-2nd-time
         # https://stackoverflow.com/questions/66794193/cant-login-with-instabot
 
-        import glob
-        cookie_del = glob.glob("config/*cookie.json")
-        os.remove(cookie_del[0])
+
+        if os.path.isfile("config/moneypig@moneypigtrading.com_uuid_and_cookie.json"):
+
+            os.remove("config/moneypig@moneypigtrading.com_uuid_and_cookie.json")
 
         d.post_to_instagram(image_file, IG_caption_message)
 
